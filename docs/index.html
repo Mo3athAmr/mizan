@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ميزان — وقتك مع الذكاء الاصطناعي، بميزان</title>
+<meta name="description" content="تطبيق ماك صغير في شريط القوائم يحسب وقتك مع كلود وشات جي بي تي وجيمناي تلقائياً. محلي بالكامل، بلا إنترنت، وبياناتك لا تغادر جهازك.">
+<meta property="og:title" content="ميزان — وقتك مع الذكاء الاصطناعي، بميزان">
+<meta property="og:description" content="يحسب وقتك مع الذكاء الاصطناعي تلقائياً من شريط الماك. محلي بالكامل ومجاني ومفتوح المصدر.">
+<meta property="og:image" content="https://aldoraibi.github.io/mizan/screenshot.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="icon.png">
+<style>
+@font-face{font-family:"thmanyah sans";src:url(fonts/thmanyahsans-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"thmanyah sans";src:url(fonts/thmanyahsans-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"thmanyah sans";src:url(fonts/thmanyahsans-Bold.woff) format("woff");font-weight:700;font-display:swap}
+:root{
+  --deep:#0E131C; --text:#EEF2F8;
+  --muted:rgba(226,233,245,.60); --faint:rgba(226,233,245,.34);
+  --line:rgba(190,205,230,.12); --accent:#DCE4F0; --on:#6EA8FF;
+  --glass:rgba(30,36,48,.55);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--text);background:var(--deep);
+  font-family:"thmanyah sans",system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.85;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(140px);pointer-events:none}
+body::before{width:70vw;height:70vw;top:-25vw;left:-10vw;background:rgba(46,58,80,.9)}
+body::after{width:60vw;height:60vw;bottom:-25vw;right:-15vw;background:rgba(62,74,94,.55)}
+a{color:var(--on);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+.iso{unicode-bidi:isolate}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:20px;
+  backdrop-filter:blur(24px) saturate(1.3);-webkit-backdrop-filter:blur(24px) saturate(1.3)}
+header{text-align:center;padding:72px 0 40px}
+.appicon{width:120px;height:120px;border-radius:27px;filter:drop-shadow(0 16px 40px rgba(110,168,255,.25))}
+h1{font-size:52px;line-height:1.2;margin:18px 0 8px;font-weight:700}
+.tag{font-size:21px;color:var(--muted);margin:0 auto 6px;max-width:640px}
+.sub{font-size:15px;color:var(--faint);margin:0 auto 28px;max-width:620px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:999px;font-weight:700;font-size:17px;
+  background:var(--accent);color:#1E2430;border:1px solid transparent;transition:filter .15s}
+.btn:hover{filter:brightness(1.08);text-decoration:none}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border-color:var(--line)}
+.req{font-size:13.5px;color:var(--faint)}
+.shots{display:flex;gap:22px;justify-content:center;align-items:flex-start;flex-wrap:wrap;padding:14px 20px 10px}
+.shots img{border-radius:18px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.45);height:auto}
+.shots .menu{width:380px;max-width:100%}
+.shots .dash{width:520px;max-width:100%}
+section{padding:46px 0}
+h2{font-size:28px;margin:0 0 6px;font-weight:700}
+.lead{color:var(--muted);margin:0 0 24px;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{padding:20px 22px;border-radius:12px}
+.card h3{margin:0 0 4px;font-size:17px;font-weight:700}
+.card p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.75}
+.card svg{width:26px;height:26px;margin-bottom:8px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+ol.steps li{counter-increment:s;position:relative;padding:15px 62px 15px 20px;border-radius:12px;font-size:15.5px}
+ol.steps li::before{content:counter(s);position:absolute;right:18px;top:15px;width:28px;height:28px;border-radius:50%;
+  background:var(--accent);color:#1E2430;font-size:14px;font-weight:700;display:grid;place-items:center}
+.note{margin-top:14px;padding:14px 18px;border-radius:12px;font-size:14.5px;color:var(--muted);
+  background:rgba(110,168,255,.08);border:1px solid rgba(110,168,255,.25)}
+.note.warn{background:rgba(255,180,168,.07);border-color:rgba(255,180,168,.25)}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:15px;overflow:hidden}
+th,td{padding:12px 18px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;font-size:14px;color:var(--muted)}
+tr:last-child td{border-bottom:none}
+td.dim{color:var(--muted)}
+footer{padding:40px 0 56px;text-align:center;color:var(--faint);font-size:14px}
+footer p{margin:0 0 8px}
+.credit{display:inline-flex;align-items:center;gap:8px;color:var(--faint);font-weight:500;font-size:13px;margin-top:14px}
+.yahya-signature{height:10px;width:auto;display:inline-block;direction:ltr}
+@media(max-width:640px){h1{font-size:38px}.tag{font-size:18px}body{font-size:16px}.appicon{width:96px;height:96px}th,td{padding:10px 12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <img class="appicon" src="icon.png" alt="أيقونة ميزان: حلقة ساعة بعلامات مضيئة">
+    <h1>ميزان</h1>
+    <p class="tag">وقتك مع الذكاء الاصطناعي، بميزان.</p>
+    <p class="sub">تطبيق صغير في شريط قوائم الماك يحسب تلقائياً كم تقضي مع كلود وشات جي بي تي وجيمناي، ومتى، ويذكّرك بالراحة.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/aldoraibi/mizan/releases/latest/download/Mizan.zip">تحميل مجاني</a>
+      <a class="btn ghost" href="https://github.com/aldoraibi/mizan">الكود المصدري</a>
+    </div>
+    <p class="req"><span class="iso">macOS 14</span> فأحدث · مفتوح المصدر برخصة <span class="iso">MIT</span> · بلا إنترنت</p>
+  </div>
+</header>
+
+<div class="shots">
+  <img class="menu" src="screenshot.png" alt="قائمة ميزان في شريط القوائم: وقت اليوم والأسبوع والشهر، وأقسام كلود">
+  <img class="dash" src="dashboard.png" alt="نافذة الإحصائيات: الوقت النشط وساعة يومك">
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>ماذا يفعل</h2>
+    <p class="lead">يعمل في الخلفية دون أن تفعل شيئاً. تنظر للشريط فتعرف.</p>
+    <div class="grid">
+      <div class="card glass"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <h3>يحسب تلقائياً</h3>
+        <p>يعرف أي أداة أمامك: محادثات كلود، والعمل المشترك، والبرمجة، وشات جي بي تي، وجيمناي، في تطبيقاتها أو في المتصفح. ولا يحسب الوقت وأنت بعيد عن الجهاز.</p></div>
+      <div class="card glass"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+        <h3>شعار يعدّ الساعات</h3>
+        <p>كل علامة في الشعار ساعة من يومك، تضيء مع عقارب الساعة. وما يتجاوز حدّك اليومي يتلوّن بلون التحذير.</p></div>
+      <div class="card glass"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9h-9z"/></svg>
+        <h3>ساعة يومك</h3>
+        <p>حلقة من ٢٤ ساعة تريك متى اشتغلت فعلاً، لا كم فقط، بلون كل أداة. مرّر الماوس على أي ساعة لتفاصيلها.</p></div>
+      <div class="card glass"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        <h3>يوم وأسبوع وشهر</h3>
+        <p>إحصائيات لكل فترة، وشهر يبدأ من اليوم الذي تختاره، وأرشيف للأشهر السابقة، وتقارير <span class="iso">PDF</span> و<span class="iso">CSV</span>.</p></div>
+      <div class="card glass"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.5-7 11-7 11z"/></svg>
+        <h3>تنبيهات صحية</h3>
+        <p>تذكير بالراحة بعد العمل المتواصل، وتنبيه عند تجاوز حدّك اليومي. أنت تختار المدة والحد.</p></div>
+      <div class="card glass"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <h3>بياناتك لك وحدك</h3>
+        <p>لا يتصل بالإنترنت أبداً، ولا حسابات ولا تتبّع. كل شيء محفوظ في قاعدة بيانات محلية على جهازك.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>التركيب</h2>
+    <p class="lead">دقيقتان تقريباً.</p>
+    <ol class="steps">
+      <li class="glass">نزّل <b>Mizan.zip</b> وافتحه، ثم انقل <b>ميزان</b> إلى مجلد التطبيقات (<span class="iso">Applications</span>).</li>
+      <li class="glass">افتحه مرة. سيظهر تنبيه بأن آبل لا تستطيع التحقق منه، فاختر «تم».</li>
+      <li class="glass">افتح <b>إعدادات النظام ← الخصوصية والأمان</b>، وانزل إلى الأسفل، واضغط <b>«فتح على أي حال»</b>. هذه الخطوة مرة واحدة فقط.</li>
+      <li class="glass">امنح ميزان صلاحية <b>تسهيلات الاستخدام</b> (<span class="iso">Accessibility</span>) عندما يطلبها، ثم أعد تشغيله. تظهر حلقة الساعة في شريط القوائم.</li>
+    </ol>
+    <p class="note warn"><b>لماذا يظهر تنبيه آبل؟</b> التطبيق مجاني وغير موقّع بشهادة مطوّر مدفوعة من آبل، فيطلب النظام تأكيدك في أول فتح فقط. الكود مفتوح بالكامل لمن يريد مراجعته أو بناءه بنفسه.</p>
+    <p class="note"><b>لماذا صلاحية تسهيلات الاستخدام؟</b> ليعرف ميزان أي قسم مفتوح أمامك في تطبيق كلود، وأي موقع في المتصفح، فيقرأ <b>عنوان الصفحة فقط</b>. لا يقرأ محادثاتك ولا ما تكتبه، ولا يرسل شيئاً خارج جهازك. بدونها يحسب ميزان وقت التطبيقات المستقلة فقط.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>ما يقيسه</h2>
+    <p class="lead">القياس على الماك فقط. استخدامك من الجوال أو الآيباد لا يُحسب.</p>
+    <table class="glass">
+      <tr><th>الأداة</th><th>من أين يقيسها</th></tr>
+      <tr><td>كلود: المحادثة، والعمل المشترك، والبرمجة</td><td class="dim">تطبيق كلود للماك، وموقع <span class="iso">claude.ai</span>، وسجلات <span class="iso">Claude Code</span> المحلية</td></tr>
+      <tr><td>شات جي بي تي</td><td class="dim">تطبيقه للماك، وموقع <span class="iso">chatgpt.com</span></td></tr>
+      <tr><td>جيمناي</td><td class="dim">موقع <span class="iso">gemini.google.com</span> و<span class="iso">AI Studio</span></td></tr>
+    </table>
+    <p class="note">«عمل الوكيل» وقت يعمل فيه كلود على مهمتك وأنت بعيد عن الشاشة، ويُعرض منفصلاً ولا يُحسب من وقتك.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>الخط: <a href="https://font.thmanyah.com/">خط ثمانية</a>، مجاني للتطبيقات والمواقع.</p>
+    <p>مفتوح المصدر برخصة <span class="iso">MIT</span> · <a href="https://github.com/aldoraibi/mizan">GitHub</a> · <a href="https://x.com/ALDoraibi">‎@ALDoraibi</a></p>
+    <div class="credit">مطوّر بواسطة <svg class="yahya-signature" xmlns="http://www.w3.org/2000/svg" viewBox="-8 -8 1492 116" role="img" aria-label="YAHYA ALDORAIBI">
+<title>YAHYA ALDORAIBI — small (للأحجام الصغيرة حتى 24 بكسل ارتفاعاً)</title>
+<g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="butt" stroke-linejoin="miter">
+<path transform="translate(0 0)" d="M0,0 L48,50"/>
+<path transform="translate(0 0)" d="M96,0 L48,50 L48,100"/>
+<path transform="translate(126 0)" d="M0,100 L44,0 L88,100"/>
+<path transform="translate(126 0)" d="M18,64 L70,64"/>
+<path transform="translate(244 0)" d="M0,0 V100"/>
+<path transform="translate(244 0)" d="M78,0 V100"/>
+<path transform="translate(244 0)" d="M0,50 H78"/>
+<path transform="translate(352 0)" d="M0,0 L48,50"/>
+<path transform="translate(352 0)" d="M96,0 L48,50 L48,100"/>
+<path transform="translate(478 0)" d="M0,100 L44,0 L88,100"/>
+<path transform="translate(478 0)" d="M18,64 L70,64"/>
+<path transform="translate(676 0)" d="M0,100 L44,0 L88,100"/>
+<path transform="translate(676 0)" d="M18,64 L70,64"/>
+<path transform="translate(794 0)" d="M0,0 V100 H62"/>
+<path transform="translate(886 0)" d="M0,0 V100"/>
+<path transform="translate(886 0)" d="M0,0 H30 C92,0 92,100 30,100 H0"/>
+<path transform="translate(994 0)" d="M100,50 A50,50 0 1 1 0,50 A50,50 0 1 1 100,50"/>
+<path transform="translate(1124 0)" d="M0,100 V0"/>
+<path transform="translate(1124 0)" d="M0,0 H40 C78,0 78,54 40,54 H0"/>
+<path transform="translate(1124 0)" d="M36,54 L74,100"/>
+<path transform="translate(1228 0)" d="M0,100 L44,0 L88,100"/>
+<path transform="translate(1228 0)" d="M18,64 L70,64"/>
+<path transform="translate(1346 0)" d="M0,0 V100"/>
+<path transform="translate(1376 0)" d="M0,0 V100"/>
+<path transform="translate(1376 0)" d="M0,0 H36 C68,0 68,48 36,48 H0"/>
+<path transform="translate(1376 0)" d="M0,48 H40 C76,48 76,100 40,100 H0"/>
+<path transform="translate(1476 0)" d="M0,0 V100"/>
+</g></svg></div>
+  </div>
+</footer>
+
+</body>
+</html>

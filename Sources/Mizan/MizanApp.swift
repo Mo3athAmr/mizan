@@ -5,10 +5,18 @@ import SwiftUI
 
 /// ميزان يُدار من AppKit: أيقونة في شريط القوائم تفتح لوحاً زجاجياً شفافاً (NSPanel) بدل MenuBarExtra،
 /// لأن نافذة MenuBarExtra في macOS 26 ترسم خلفية معتمة خاصة بها لا يمكن إزالتها.
+///
+/// نقطة البدء AppKit خالصة، بلا مشاهد SwiftUI: مشهد Settings الفارغ السابق كان النظام يعيد فتحه
+/// عند إعادة التشغيل نافذةً فارغة باسم «إعدادات ميزان».
 @main
-struct MizanApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
-    var body: some Scene { SwiftUI.Settings { EmptyView() } }
+enum MizanMain {
+    @MainActor static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate = delegate
+        app.setActivationPolicy(.accessory)
+        withExtendedLifetime(delegate) { app.run() }
+    }
 }
 
 @MainActor

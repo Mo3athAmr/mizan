@@ -27,11 +27,18 @@
 
 ## البناء من المصدر
 
-يتطلب Xcode على macOS 14 فأحدث:
+**للبناء:** Xcode 26 فأحدث (حزمة macOS 26 SDK)، لأن المصدر يستخدم واجهات Liquid Glass. **للتشغيل:** macOS 14 فأحدث؛ على الإصدارات الأقدم من 26 تُستخدم مواد شفافة عادية بدلها.
+
+**المعماريات:**
+- Apple Silicon (`arm64`)
+- Intel (`x86_64`)
+
+يبني السكربت الشريحتين كلاً على حدة ثم يدمجهما بـ `lipo` في ملف تنفيذي واحد (Universal) داخل `Mizan.app`، ويتحقق من وجودهما قبل التوقيع وبعده، ويفشل إن غابت إحداهما.
 
 ```sh
-./scripts/build-app.sh            # يبني build/Mizan.app
+./scripts/build-app.sh            # يبني build/Mizan.app (arm64 + x86_64)
 ./scripts/build-app.sh --install  # يبنيه ويثبّته في مجلد التطبيقات
+MIZAN_ARCHS=x86_64 ./scripts/build-app.sh   # شريحة واحدة صراحةً (اختياري)
 swift test                        # الاختبارات
 ```
 

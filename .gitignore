@@ -1,4 +1,5 @@
 .build/
+.build-*/
 build/
 probe-output/
 .DS_Store

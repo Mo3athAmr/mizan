@@ -3,11 +3,36 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
-swift build -c release
+
+# المعماريات المطلوبة في الملف التنفيذي: افتراضياً Universal (Apple Silicon + Intel).
+# MIZAN_ARCHS="x86_64" (مثلاً) لبناء شريحة واحدة صراحةً؛ لا يُنتَج ملف ناقص بصمت أبداً.
+ARCHS=(${=MIZAN_ARCHS:-arm64 x86_64})
+
+# كل معمارية تُبنى في مجلد عمل مستقل، ثم تُدمج الملفات التنفيذية بـ lipo.
+BINS=()
+for arch in $ARCHS; do
+  swift build -c release --arch "$arch" --scratch-path ".build-$arch"
+  bin_dir=$(swift build -c release --arch "$arch" --scratch-path ".build-$arch" --show-bin-path)
+  [[ -f "$bin_dir/Mizan" ]] || { echo "خطأ: لم يُنتَج $bin_dir/Mizan للمعمارية $arch" >&2; exit 1 }
+  BINS+=("$bin_dir/Mizan")
+done
+
+# يتحقق أن الملف يحوي المعماريات المطلوبة بالضبط (دون الاعتماد على ترتيبها).
+verify_archs() {
+  local actual=(${=$(lipo -archs "$1")}) want have found
+  for want in $ARCHS; do
+    found=0
+    for have in $actual; do [[ "$have" == "$want" ]] && found=1; done
+    (( found )) || { echo "خطأ: المعمارية $want غائبة عن $1 (الموجود: ${actual[*]})" >&2; exit 1 }
+  done
+  (( ${#actual} == ${#ARCHS} )) || { echo "خطأ: معماريات غير متوقعة في $1: ${actual[*]}" >&2; exit 1 }
+}
+
 APP=build/Mizan.app
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp .build/release/Mizan "$APP/Contents/MacOS/Mizan"
+lipo -create "${BINS[@]}" -output "$APP/Contents/MacOS/Mizan"
+verify_archs "$APP/Contents/MacOS/Mizan"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 # خط ثمانية مضمّن في التطبيق، فيظهر كما صُمّم حتى على جهاز لا يملك الخط (مجاني للتطبيقات: font.thmanyah.com)
 mkdir -p "$APP/Contents/Resources/Fonts"
@@ -34,7 +59,10 @@ PLIST
 # توقيع محلي بمتطلّب ثابت (المعرّف فقط) حتى لا تسقط صلاحية Accessibility مع كل إعادة بناء.
 # قبل النشر العام: يُستبدل بتوقيع Developer ID من Apple.
 codesign --force --sign - -r='designated => identifier "local.mizan.app"' "$APP"
-echo "تم البناء: $PWD/$APP"
+# بعد التوقيع: الملف التنفيذي ما زال يحمل المعماريات المطلوبة والتوقيع سليم.
+verify_archs "$APP/Contents/MacOS/Mizan"
+codesign --verify --deep --strict --verbose=2 "$APP"
+echo "تم البناء: $PWD/$APP ($(lipo -archs "$APP/Contents/MacOS/Mizan"))"
 
 # ./scripts/build-app.sh --install ← ينسخه إلى مجلد التطبيقات ويشغّله
 if [[ "${1:-}" == "--install" ]]; then
